@@ -1,0 +1,26 @@
+# Chaque route est représentée par son nom
+# puis ses informations :
+# - path représente l'URL
+# - requirements représente les contraintes
+# - defaults représente les valeurs par défaut des paramètres (y compris du paramètre fictif _controller)
+# Grosso modo : c'est exactement ce qu'on avait tapé en PHP mais dans un format plus linéaire qui se prête un peu mieux
+# à la configuration
+list:
+  path: /
+  defaults:
+    _controller: App\Controller\TaskController@index
+show:
+  path: /show/{id}
+  requirements:
+    id: '\d+'
+  defaults:
+    _controller: App\Controller\TaskController@show
+create:
+  path: /create
+  defaults:
+    _controller: App\Controller\TaskController@create
+hello:
+  path: /hello/{name}
+  defaults:
+    name: World,
+    _controller: App\Controller\HelloController@sayHello
