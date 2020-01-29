@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Enregistrer</button>
     </form>
 
-    <a href="index.php">Retour à la liste</a>
+    <a href="/">Retour à la liste</a>
 </body>
 
 </html>
