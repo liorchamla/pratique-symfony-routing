@@ -16,55 +16,46 @@ use Symfony\Component\Routing\RouteCollection;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Création de la collection de routes disponibles pour notre application
 $routesCollection = new RouteCollection();
+$routesCollection->add('list', new Route('/'));
 
 /**
- * CREATION D'UNE ROUTE :
+ * DECOUVERTE DES REQUIREMENTS
  * -----------
- * Une Route est représentée par un objet de la classe Route et représente une URL. Cette URL peut contenir des partie dynamiques (appelées
- * "route parameters" ou "paramètres de route"), comme par exemple : /show/{id} ou {id} pourrait être remplacé par n'importe quoi, donc
- * - /show/bonjour correspondrait bien à la route /show/{id} ou {id} contiendrait désormais "bonjour"
- * - /show/110 correspondrait aussi à la route /show/{id} ou {id} contiendrait désormais "110"
+ * Les requirements (obligations, ou contraintes) sont des règles qui pèses sur les PARAMETRES DE ROUTE (comme {id} dans la route /show/{id})
+ * Ils expliquent comment doit se comporter un paramètre. Ici nous souhaitons dire que le paramètre {id} doit forcément être un nombre positif
  * 
- * On aura donc une collection de routes qui représentent chacune une URL donnée.
+ * Ces requirements se font via des expressions régulières que vous créez vous mêmes. Ici nous utilisons \d+ qui veut dire litteralement qu'on
+ * veut "un chiffre" (\d), "une fois ou plus" (+), ce qui correspond donc autant à 0, 1, 110 ou 254948.
  * 
+ * Désormais, appeler /show/bonjour générera une ResourceNotFoundException car le matcher considère que rien ne correspond à une telle URL
+ * Par contre, /show/110 ou /show/12345560 correspondra bien à notre route.
+ * 
+ * Notez que la contrainte sur le paramètre id peut aussi s'écrire directement dans l'URL comme suit :
+ * new Route('/show/{id<\d+>}') => Plus élégant et rapide ;-)
  */
-$listRoute = new Route('/');
-$showRoute = new Route('/show/{id}');
-$formRoute = new Route('/create');
+$routesCollection->add('show', new Route('/show/{id}', [], [
+    'id' => '\d+'
+]));
+$routesCollection->add('create', new Route('/create'));
 
 /**
- * AJOUT DES ROUTES ET NOMMAGE :
- * ---------
- * On peut désormais ajouter les route à notre collection. C'est l'occasion d'ailleurs de nommer ces routes !
- * Je vais en profiter pour donner à chaque route le nom qui correspond au fichier à inclure (pas folle la guêpe !) :
- * - $listRoute (/) correspond au fichier list.php (sera donc nommée "list")
- * - $showRoute (/show/{id}) correspond au fichier show.php (sera donc nommée "show")
- * - $formRoute (/create) correspond au fichier create.php (sera donc nommée "create")
+ * DECOUVERTE DES PARAMETRES PAR DEFAUT 
+ * ------------
+ * Nous allons créer une route correspondant à /hello/{name} mais nous souhaitons que le paramètre {name} soit optionnel !
+ * On doit pouvoir appeler autant /hello/Lior que /hello tout court ! 
  * 
+ * On l'a vu avec la route /show/{id}, si on n'envoi pas d'id, on a une erreur ResourceNotFoundException ce qui veut dire qu'on DOIT envoyer
+ * les paramètres demandés par la route. 
+ * 
+ * SAUF SI ON ETABLIT DES VALEURS PAR DEFAUT
+ * ------------
+ * Le seul moyen de faire marcher une route /hello/{name} sans lui envoyer de {name}, c'est de définir pour le paramètre name une valeur par 
+ * défaut ! Imaginons qu'on donne la valeur par défaut "World" au paramètre name, quand on appellera /hello sans name, le matcher trouvera
+ * pourtant bien la route en question et nous renverra "World" comme valeur pour le paramètre name :D
  */
-$routesCollection->add('list', $listRoute);
-$routesCollection->add('show', $showRoute);
-$routesCollection->add('create', $formRoute);
-
-/**
- * RENCONTRE AVEC LE FABULEUX URL MATCHER !
- * ----------
- * On a donc une liste de routes bien définies, mais il faut maintenant savoir à quelle route correspond l'URL tapée REELLEMENT par l'utilisateur
- * 
- * Par exemple : si on tape /show/110 dans le navigateur, à quelle Route cela correspond ? L'UrlMatcher est là pour nous aider à le découvrir !
- * 
- * La classe UrlMatcher possède une méthode "match(url)" qui reçoit une url (comme "/show/110") et qui va analyser la RouteCollection pour
- * comprendre à quelle route cela correspond et nous retourner des informations sur cette route (son nom, et plein d'autres choses)
- * 
- * Pour fonctionner, l'UrlMatcher a besoin de deux choses :
- * - La RouteCollection : oui, ça semble logique, pour découvrir quelle route est concernée par une URL donnée, il faut déjà connaitre les
- * routes existantes ...
- * - Le RequestContext : c'est un objet qui représente le contexte de la requête HTTP actuelle (principalement l'URL et la méthode utilisée)
- * 
- * Il faut donc avant tout que l'on découvre l'URL qui a été appelée (on peut le faire via la superglobale $_SERVER['PATH_INFO']) et la 
- * méthode HTTP qui a été utilisée (là aussi, on peut le faire via la superglobale $_SERVER['REQUEST_METHOD'])
- */
+$routesCollection->add('hello', new Route('/hello/{name}', ['name' => 'World']));
 
 // 1) Construisons le RequestContext :
 $url = $_SERVER['PATH_INFO'] ?? '/'; // Si il n'y a rien dans le PATH_INFO c'est qu'on est sur "/"
