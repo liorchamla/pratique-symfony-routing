@@ -23,7 +23,7 @@ $data = require_once 'data.php';
 <body>
     <h1>Liste des tâches</h1>
 
-    <a href="/">Créer une tâche</a>
+    <a href="/create">Créer une tâche</a>
 
     <?php foreach ($data as $id => $task) : ?>
         <h2><?= $task['title'] ?> (<?= $task['completed'] ? "Complête" : "Incomplête" ?>)</h2>
