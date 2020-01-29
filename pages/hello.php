@@ -1,24 +1,3 @@
-<?php
-
-/**
- * DEMONSTRATION DE PARAMETRES PAR DEFAUT 
- * -----------
- * Pour bien comprendre, imaginons qu'on appelle /hello/Lior
- * $urlMatcher->match($url) va nous renvoyer le tableau suivant :
- * ['_route' => 'hello', 'name' => 'Lior']
- * 
- * Imaginons maintenant qu'on appelle simplement /hello
- * $urlMatcher->match($url) va nous renvoyer le tableau suivant :
- * ['_route' => 'hello', 'name' => 'World']
- * 
- * Car nous avons précisé que par défaut, si rien n'est précisé, le paramètre {name} prend la valeur 'World'
- * 
- * Merveilleux !
- */
-
-$name = $currentRoute['name'];
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 

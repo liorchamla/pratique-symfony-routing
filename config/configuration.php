@@ -18,44 +18,39 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 // Création de la collection de routes disponibles pour notre application
 $routesCollection = new RouteCollection();
-$routesCollection->add('list', new Route('/'));
 
 /**
- * DECOUVERTE DES REQUIREMENTS
+ * DECOUVERTE DES PARAMETRES SUPPLEMENTAIRES :
+ * ---------------
+ * Dans la section précédente, on a vu qu'on pouvait définir des valeurs par défaut pour des paramètres de route. MAIS ON PEUT FAIRE PLUS 
+ * ENCORE ! On peut définir des valeurs par défaut SUPPLEMENTAIRES, on n'est pas limité aux paramètres de la route.
+ * 
+ * Ici par exemple, j'ajoute un paramètre que j'appelle '_controller' et qui contient une chaine de caractères représentant la classe que je
+ * veux instancier et la méthode que je veux appeler dessus !
+ * 
+ * Désormais, en tapant /hello/Lior, l'urlMatcher va me renvoyer le tableau suivant :
+ * ['_route' => 'hello', 'name' => 'Lior', '_controller' => 'App\Controller\HelloController@sayHello']
+ * 
+ * Charge à moi ensuite de travailler sur la chaine _controller pour instancier la bonne classe et appeler la méthode sayHello() dessus !
+ * Magique.
+ * 
+ * Bien sur, on fait ça pour toutes nos routes :)
+ * 
+ * IMPORTANT ET A NOTER :
  * -----------
- * Les requirements (obligations, ou contraintes) sont des règles qui pèses sur les PARAMETRES DE ROUTE (comme {id} dans la route /show/{id})
- * Ils expliquent comment doit se comporter un paramètre. Ici nous souhaitons dire que le paramètre {id} doit forcément être un nombre positif
- * 
- * Ces requirements se font via des expressions régulières que vous créez vous mêmes. Ici nous utilisons \d+ qui veut dire litteralement qu'on
- * veut "un chiffre" (\d), "une fois ou plus" (+), ce qui correspond donc autant à 0, 1, 110 ou 254948.
- * 
- * Désormais, appeler /show/bonjour générera une ResourceNotFoundException car le matcher considère que rien ne correspond à une telle URL
- * Par contre, /show/110 ou /show/12345560 correspondra bien à notre route.
- * 
- * Notez que la contrainte sur le paramètre id peut aussi s'écrire directement dans l'URL comme suit :
- * new Route('/show/{id<\d+>}') => Plus élégant et rapide ;-)
+ * J'ai CHOISI d'appeler cette information '_controller' parce que c'est ce qu'on voit le plus souvent (et que vous retrouvez dans le framework
+ * Symfony) mais j'aurai pu choisir de l'appeler 'cocoLAsticot', C'EST ARBITRAIRE !
  */
-$routesCollection->add('show', new Route('/show/{id}', [], [
+$routesCollection->add('hello', new Route('/hello/{name}', [
+    'name' => 'World',
+    '_controller' => 'App\Controller\HelloController@sayHello'
+]));
+
+$routesCollection->add('list', new Route('/', ['_controller' => 'App\Controller\TaskController@index']));
+$routesCollection->add('show', new Route('/show/{id}', ['_controller' => 'App\Controller\TaskController@show'], [
     'id' => '\d+'
 ]));
-$routesCollection->add('create', new Route('/create'));
-
-/**
- * DECOUVERTE DES PARAMETRES PAR DEFAUT 
- * ------------
- * Nous allons créer une route correspondant à /hello/{name} mais nous souhaitons que le paramètre {name} soit optionnel !
- * On doit pouvoir appeler autant /hello/Lior que /hello tout court ! 
- * 
- * On l'a vu avec la route /show/{id}, si on n'envoi pas d'id, on a une erreur ResourceNotFoundException ce qui veut dire qu'on DOIT envoyer
- * les paramètres demandés par la route. 
- * 
- * SAUF SI ON ETABLIT DES VALEURS PAR DEFAUT
- * ------------
- * Le seul moyen de faire marcher une route /hello/{name} sans lui envoyer de {name}, c'est de définir pour le paramètre name une valeur par 
- * défaut ! Imaginons qu'on donne la valeur par défaut "World" au paramètre name, quand on appellera /hello sans name, le matcher trouvera
- * pourtant bien la route en question et nous renverra "World" comme valeur pour le paramètre name :D
- */
-$routesCollection->add('hello', new Route('/hello/{name}', ['name' => 'World']));
+$routesCollection->add('create', new Route('/create', ['_controller' => 'App\Controller\TaskController@create']));
 
 // 1) Construisons le RequestContext :
 $url = $_SERVER['PATH_INFO'] ?? '/'; // Si il n'y a rien dans le PATH_INFO c'est qu'on est sur "/"

@@ -1,15 +1,3 @@
-<?php
-
-/**
- * LISTE DES TÂCHES :
- * -----------
- * Cette page nous montre la liste des tâches. On l'appelle en tapant l'url /index.php (ou encore /index.php?page=list ou même encore juste /)
- */
-
-// On récupère les tâches
-$data = require_once 'data.php';
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
