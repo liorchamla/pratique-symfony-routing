@@ -9,12 +9,18 @@
  * attend.
  */
 
-use Symfony\Component\Config\FileLocator;
-use Symfony\Component\Routing\Loader\YamlFileLoader;
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\RequestContext;
+use App\AnnotationLoader\ControllerAnnotationLoader;
 use Symfony\Component\Routing\Route;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\RouteCollection;
+use Doctrine\Common\Annotations\AnnotationReader;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Symfony\Component\Routing\Loader\YamlFileLoader;
+use Symfony\Component\Routing\Loader\AnnotationFileLoader;
+use Symfony\Component\Routing\Loader\AnnotationClassLoader;
+use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -32,7 +38,10 @@ require_once __DIR__ . '/../vendor/autoload.php';
  * 
  */
 
-// Création de la collection de routes disponibles pour notre application
+/**
+ * CHARGEMENT DES ROUTES DU FICHIER YAML
+ * --------
+ */
 // 1) On créé un localisateur de fichiers de configuration qui va chercher dans CE DOSSIER (on est dans le dossier config ;))
 $fileLocator = new FileLocator([__DIR__]);
 // 2) On créé un chargeur de fichier YAML spécifique aux routes, il se sert du locator pour trouver les fichiers yaml
@@ -40,17 +49,56 @@ $routesYamlLoader = new YamlFileLoader($fileLocator);
 // 3) On charge la collection de routes du fichier routes.yml
 $routesCollection = $routesYamlLoader->load('routes.yml');
 
-// Remplace l'ancien code :
-// $routesCollection = new RouteCollection();
-// $routesCollection->add('hello', new Route('/hello/{name}', [
-//     'name' => 'World',
-//     '_controller' => 'App\Controller\HelloController@sayHello'
-// ]));
-// $routesCollection->add('list', new Route('/', ['_controller' => 'App\Controller\TaskController@index']));
-// $routesCollection->add('show', new Route('/show/{id}', ['_controller' => 'App\Controller\TaskController@show'], [
-//     'id' => '\d+'
-// ]));
-// $routesCollection->add('create', new Route('/create', ['_controller' => 'App\Controller\TaskController@create']));
+/**
+ * CHARGEMENT DES ROUTES A PARTIR DES ANNOTATIONS
+ * --------
+ * Pour pouvoir charger la configuration à partir des annotations qui se trouvent dans nos classes, on a besoin d'un lecteur d'annotations.
+ * 
+ * La composant symfony/routing nous prodigue ce lecteur : la classe AnnotationDirectoryLoader qui va pouvoir lire toutes les classes d'un
+ * dossier et en extraire les annotations (dans notre cas, les annotations @Route qui se trouvent sur les fonctions)
+ * 
+ * Quand Doctrine va voir une annotation @Route, il va trouver la classe PHP qui correspond à cette annotation et la traduire en PHP natif.
+ * 
+ * On devra ensuite travailler sur l'objet que Doctrine aura déduit de l'annotation et .. BOUM : on obtient un objet Route comme ceux qu'on
+ * avait lorsqu'on construisait notre collection (voir la partie 1).
+ * 
+ * ATTENTION :
+ * ---------
+ * Quand Doctrine voit une annotation @Route, il cherche la classe qui correspond. Par défaut, il ne la trouvera pas, il faut donc lui 
+ * donner accès à l'autoloader afin qu'il puisse la retrouver 
+ */
+$loader = require __DIR__ . '/../vendor/autoload.php';
+
+AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+
+/**
+ * CREONS LE LOADER D'ANNOTATIONS :
+ * ------------
+ * Le composant nous fournit une classe AnnotationDirectoryLoader qui permet d'aller inspecter tous les fichiers dans un dossier particulier
+ * et en extraire toutes les annotations !
+ * 
+ * Pour le construire, on lui passe un FileLocator (qui permet de rechercher des fichiers dans un chemin spécifié) et un autre objet qui doit
+ * hériter de la classe abstraite AnnotationClassLoader.
+ * 
+ * Le but de cet objet sera de configurer l'objet Route que doctrine aura créé en voyant une annotation @Route
+ * 
+ * ATTENTION :
+ * ------------
+ * Le composant ne fournit pas d'objet particulier pour gérer cette partie. C'est donc à nous de créer une implémentation qui nous convient
+ * en créant une classe qui hérite de AnnotationClassLoader et qui redéfinit les fonctions nécessaires.
+ * 
+ * J'ai fait cela dans src/AnnotationLoader/ControllerAnnotationLoader.php pour donner un exemple
+ */
+$loader = new AnnotationDirectoryLoader(
+    new FileLocator([__DIR__ . '/../src/Controller']),
+    new ControllerAnnotationLoader(new AnnotationReader())
+);
+
+// Création de la collection de routes disponibles pour notre application en chargeant les annotations
+$annotationsRoutesCollection = $loader->load(__DIR__ . '/../src/Controller');
+// Fusion avec ce qui vient du YAML :
+$routesCollection->addCollection($annotationsRoutesCollection);
+
 
 // 1) Construisons le RequestContext :
 $url = $_SERVER['PATH_INFO'] ?? '/'; // Si il n'y a rien dans le PATH_INFO c'est qu'on est sur "/"

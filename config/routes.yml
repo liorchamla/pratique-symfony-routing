@@ -22,5 +22,5 @@ create:
 hello:
   path: /hello/{name}
   defaults:
-    name: World,
+    name: World
     _controller: App\Controller\HelloController@sayHello
