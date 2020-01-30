@@ -1,0 +1,19 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+	Liste des tâches
+{% endblock %}
+
+{% block body %}
+	<h1>Liste des tâches</h1>
+
+	<a href="{{ urlGenerator.generate('create') }}">Créer une tâche</a>
+
+	{% for id, task in tasks %}
+		<h2>{{ task.title }}
+			({{ task.completed ? "Complête" : "Incomplête"}})</h2>
+		<small>Priorité :
+			{{ task.priority }}</small><br>
+		<a href="{{ urlGenerator.generate('show', {'id': id})}}">En savoir plus</a>
+	{% endfor %}
+{% endblock %}

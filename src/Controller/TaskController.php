@@ -5,24 +5,7 @@ namespace App\Controller;
 use LogicException;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * DECOUVRONS UN CONTROLLER :
- * -----------
- * Dans cette classe, j'ai extrait toute la logique qui se trouvait avant dans les fichiers d'affichages (les vues du dossier "pages")
- * 
- * Chaque route devient correspond désormais à une méthode de la classe.
- * 
- * ATTENTION, IMPORTANT : LES PARAMETRES DES ROUTES
- * -----------
- * Une des actions que l'on avait créé (l'action de voir les détails d'un article avec /show/{id}) nécessite d'avoir accès aux paramètres de la
- * route. 
- * 
- * Dans le fichier index.php, on va instancier cette classe et appeler la méthode voulue en lui passant en paramètre les informations relatives
- * à la route que le matcher nous a rendu.
- * 
- * Chaque méthode de nos controller peut donc recevoir ce tableau d'informations sur la route actuelle (et donc les paramètres)
- */
-class TaskController
+class TaskController extends Controller
 {
     /**
      * @Route("/", name="index")
@@ -30,9 +13,11 @@ class TaskController
     public function index()
     {
         // On récupère les tâches
-        $data = require_once 'data.php';
+        $tasks = require_once __DIR__ . '/../../data.php';
 
-        require_once __DIR__ . '/../../pages/list.php';
+        $this->renderView('task/list.html.twig', [
+            'tasks' => $tasks
+        ]);
     }
 
     /**
@@ -40,21 +25,23 @@ class TaskController
      */
     public function show(array $routeParams)
     {
-        // On appelle la liste des tâches
-        $data = require_once "data.php";
+        // On récupère les tâches
+        $tasks = require_once __DIR__ . '/../../data.php';
 
         // On récupère l'id (qui est un paramètre de la route)
         $id = $routeParams['id'];
 
         // Si aucun id n'est passé ou que l'id n'existe pas dans la liste des tâches, on arrête tout !
-        if (!$id || !array_key_exists($id, $data)) {
+        if (!$id || !array_key_exists($id, $tasks)) {
             throw new LogicException("La tâche demandée n'existe pas !");
         }
 
         // Si tout va bien, on récupère la tâche correspondante et on affiche
-        $task = $data[$id];
+        $task = $tasks[$id];
 
-        require_once __DIR__ . '/../../pages/show.php';
+        $this->renderView('task/show.html.twig', [
+            'task' => $task
+        ]);
     }
 
     /**
@@ -72,6 +59,6 @@ class TaskController
         }
 
         // Sinon, si on est en GET, on affiche :
-        require_once __DIR__ . '/../../pages/create.php';
+        $this->renderView('task/create.html.twig');
     }
 }

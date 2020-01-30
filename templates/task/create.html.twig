@@ -1,0 +1,26 @@
+{% extends "base.html.twig" %}
+
+{% block title %}
+	Créer une nouvelle tâche
+{% endblock %}
+
+{% block body %}
+	<h1>Créer une nouvelle tâche</h1>
+
+	<form action="" method="POST">
+		<input type="text" name="title" placeholder="Titre de la tâche">
+		<input type="text" name="description" placeholder="Description de la tâche">
+		<select name="priority">
+			<option value="1">Priorité faible</option>
+			<option value="2">Priorité moyenne</option>
+			<option value="3">Priorité forte</option>
+		</select>
+		<label>
+			<input type="checkbox" name="completed">
+			Tâche terminée ?
+		</label>
+		<button type="submit">Enregistrer</button>
+	</form>
+
+	<a href="/">Retour à la liste</a>
+{% endblock %}

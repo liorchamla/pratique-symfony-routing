@@ -1,0 +1,20 @@
+{% extends "base.html.twig" %}
+
+{% block title  %}Détails de
+	{{ task.title }}
+{% endblock %}
+
+{% block body %}
+	<h1>Détails de
+		<em>{{ task.title }}</em>
+	</h1>
+	<p>{{ task.description }}</p>
+	<p>
+		La tâche est
+		<strong>{{ task.completed ? "complétée" : "encore à faire" }}
+			!</strong>
+	</p>
+	<a href="/">Retour à la liste</a>
+	ou
+	<a href="{{ urlGenerator.generate('create') }}">Créer une autre tâche</a>
+{% endblock %}
