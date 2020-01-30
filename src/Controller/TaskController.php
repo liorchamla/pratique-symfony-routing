@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * 
  * Chaque méthode de nos controller peut donc recevoir ce tableau d'informations sur la route actuelle (et donc les paramètres)
  */
-class TaskController
+class TaskController extends Controller
 {
     /**
      * @Route("/", name="index")

@@ -19,7 +19,7 @@ namespace App\Controller;
  * 
  * Chaque méthode de nos controller peut donc recevoir ce tableau d'informations sur la route actuelle (et donc les paramètres)
  */
-class HelloController
+class HelloController extends Controller
 {
     public function sayHello(array $routeParams)
     {

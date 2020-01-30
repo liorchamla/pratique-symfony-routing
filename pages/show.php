@@ -14,7 +14,7 @@
     <p>
         La tâche est <strong><?= $task['completed'] ? "complétée" : "encore à faire" ?> !</strong>
     </p>
-    <a href="/">Retour à la liste</a> ou <a href="/create">Créer une autre tâche</a>
+    <a href="/">Retour à la liste</a> ou <a href="<?= $this->urlGenerator->generate('create') ?>">Créer une autre tâche</a>
 </body>
 
 </html>

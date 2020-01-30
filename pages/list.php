@@ -11,12 +11,12 @@
 <body>
     <h1>Liste des tâches</h1>
 
-    <a href="/create">Créer une tâche</a>
+    <a href="<?= $this->urlGenerator->generate('create') ?>">Créer une tâche</a>
 
     <?php foreach ($data as $id => $task) : ?>
         <h2><?= $task['title'] ?> (<?= $task['completed'] ? "Complête" : "Incomplête" ?>)</h2>
         <small>Priorité : <?= $task['priority'] ?></small><br>
-        <a href="/show/<?= $id ?>">En savoir plus</a>
+        <a href="<?= $this->urlGenerator->generate('show', ['id' => $id]) ?>">En savoir plus</a>
     <?php endforeach ?>
 </body>
 

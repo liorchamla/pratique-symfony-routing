@@ -17,10 +17,12 @@ use Symfony\Component\Routing\RouteCollection;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Loader\YamlFileLoader;
 use Symfony\Component\Routing\Loader\AnnotationFileLoader;
 use Symfony\Component\Routing\Loader\AnnotationClassLoader;
 use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
+use Symfony\Component\Routing\Router;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
@@ -107,3 +109,26 @@ $requestContext = new RequestContext($url, $method);
 
 // 2) Construisons le UrlMatcher :
 $matcher = new UrlMatcher($routesCollection, $requestContext);
+
+/**
+ * DECOUVERTE DE L'URLGENERATOR : 
+ * -----------
+ * Le composant symfony/routing nous offre aussi un moyen de générer une URL relative à une Route. En effet, il y a un problème récurrent
+ * lors du développement et de la vie d'une application lorsqu'on décide de changer une route.
+ * 
+ * Imaginez que vous ayez une trentaine de page, et qu'une majorité d'entre elles ont un lien qui pointe vers /create.
+ * Imaginez maintenant qu'on doive modifier la route pour qu'elle devienne /new
+ * 
+ * Il vous faut alors aller voir tous les fichiers à la recherche des liens /create pour les remplacer par /new, fastidieux et débile.
+ * 
+ * L'UrlGenerator vous permet de demander à générer une URL en fonction d'un nom de Route. Prenons le cas de la route qui se nomme "create"
+ * - $urlGenerator->generate('create') donnera "/create"
+ * - si on change l'URL de la route 'create' en /new, alors $urlGenerator->generate('create') donnera "/new"
+ * 
+ * On va donc utiliser le plus souvent possible l'UrlGenerator lorsqu'il s'agira d'écrire une URL !
+ * 
+ * IMPORTANT ET A SAVOIR :
+ * ------------
+ * Notez que le composant vous offre aussi une classe Router qui combine à la fois les fonctionnalités du UrlMatcher et du UrlGenerator !
+ */
+$urlGenerator = new UrlGenerator($routesCollection, new RequestContext());
